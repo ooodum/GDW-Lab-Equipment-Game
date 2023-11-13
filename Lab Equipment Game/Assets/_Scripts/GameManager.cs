@@ -7,6 +7,6 @@ public class GameManager : MonoBehaviour {
     private void Awake() {
         if (Instance != null && Instance != this) Destroy(this); else Instance = this;
     }
-    public List<Transform> FriendlyTroops = new List<Transform>();
-    public List<Transform> EnemyTroops = new List<Transform>();
+    public List<Unit> FriendlyTroops = new List<Unit>();
+    public List<Unit> EnemyTroops = new List<Unit>();
 }
