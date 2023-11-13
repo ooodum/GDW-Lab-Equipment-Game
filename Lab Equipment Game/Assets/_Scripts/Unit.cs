@@ -13,6 +13,8 @@ public abstract class Unit : MonoBehaviour {
     protected Transform targetTransform;
     protected Unit targetUnit;
     Vector3 targetDirection;
+
+    [HideInInspector]
     public int currentAttackers; // Denotes how many enemy units are attacking this
 
     protected enum State {
@@ -22,31 +24,40 @@ public abstract class Unit : MonoBehaviour {
         Death
     }
     private void Awake() {
-        animator = transform.GetChild(0).GetComponent<Animator>();
+        rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
         SwitchState(State.Idle);
 
         hp = unit.Health;
+
+        var model = Instantiate(unit.Model, transform.position, Quaternion.identity, transform);
+        animator = model.GetComponent<Animator>();
     }
     private void Start() {
         if (unit.Friendly) GameManager.Instance.FriendlyTroops.Add(this); else GameManager.Instance.EnemyTroops.Add(this);
+
         Setup();
-        SetTarget();
     }
 
     void Update() {
+        SetTarget();
+
         UpdateTarget();
         UpdateStates();
+        PursueTarget();
         UpdateRotations();
+        //print($"This: {transform.name}, Target: {targetTransform.name}");
+
     }
 
     protected void SwitchState(State state) {
         currentState = state;
 
-        animator.CrossFade(currentState.ToString(), .2f);
+        //animator.CrossFade(currentState.ToString(), .2f);
     }
 
     void UpdateStates() {
+        print(currentState);
         switch (currentState) {
             case State.Idle: break;
 
@@ -95,19 +106,37 @@ public abstract class Unit : MonoBehaviour {
     }
 
     void UpdateTarget() {
-        if (targetTransform == null) {
-            Vector3 v = targetTransform.position - transform.position;
+        if (unit.Friendly) {
+            if (GameManager.Instance.EnemyTroops.Count < 1) return;
+        } else {
+            if (GameManager.Instance.FriendlyTroops.Count < 1) return;
+        }
+
+        if (targetTransform != null) {
+            Vector3 v = transform.position - targetTransform.position;
             distanceToTarget = v.magnitude;
             targetDirection = v.normalized;
         }
     }
 
     void SetTarget() {
+        if (targetTransform != null) return;
         if (unit.Friendly) {
             targetTransform = null;
             foreach (Unit unit in GameManager.Instance.EnemyTroops) {
                 Transform t = unit.transform;
-                if (!((transform.position - t.position).magnitude < (transform.position - targetTransform.position).magnitude)) return;
+                if (targetTransform != null) if (!((transform.position - t.position).magnitude < (transform.position - targetTransform.position).magnitude)) return;
+                if (!(unit.currentAttackers < 3)) return;
+
+                targetTransform = t;
+                targetUnit = unit;
+                unit.currentAttackers++;
+            }
+        } else {
+            targetTransform = null;
+            foreach (Unit unit in GameManager.Instance.FriendlyTroops) {
+                Transform t = unit.transform;
+                if (targetTransform != null) if (!((transform.position - t.position).magnitude < (transform.position - targetTransform.position).magnitude)) return;
                 if (!(unit.currentAttackers < 3)) return;
 
                 targetTransform = t;
@@ -115,6 +144,11 @@ public abstract class Unit : MonoBehaviour {
                 unit.currentAttackers++;
             }
         }
+
+    }
+
+    void PursueTarget() {
+        rb.velocity = targetDirection * unit.MoveSpeed;
     }
 
     public void TakeDamage(float damage) {
