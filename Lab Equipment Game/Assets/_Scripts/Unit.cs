@@ -59,7 +59,9 @@ public abstract class Unit : MonoBehaviour {
     void UpdateStates() {
         print(currentState);
         switch (currentState) {
-            case State.Idle: break;
+            case State.Idle:
+                print("IDLE");
+                break;
 
             case State.Run:
                 rb.velocity = unit.MoveSpeed * targetDirection;
