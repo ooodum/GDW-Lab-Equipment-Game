@@ -39,7 +39,6 @@ public abstract class Unit : MonoBehaviour {
         hp = unit.Health;
         GameObject model = unit.Friendly ? Instantiate(unit.Model, transform.position + Vector3.up, Quaternion.identity, transform) : transform.GetChild(0).gameObject;
         animator = model.GetComponent<Animator>();
-
         SwitchState(State.Idle);
 
         Setup();
@@ -63,7 +62,7 @@ public abstract class Unit : MonoBehaviour {
                 animator.SetTrigger("Idle");
                 break;
             case State.Run:
-                animator.SetTrigger("Walk");
+                if (targetUnit) animator.SetTrigger("Walk"); else animator.SetTrigger("Idle");
                 break;
             default: break;
                 //case State.Death: break;
@@ -71,6 +70,8 @@ public abstract class Unit : MonoBehaviour {
     }
 
     void UpdateStates() {
+        transform.GetChild(0).GetChild(1).position = Vector3.zero;
+
         switch (currentState) {
             case State.Idle:
                 if (GameManager.Instance.CurrentGameState == GameManager.GameState.Play) SwitchState(State.Run);
@@ -163,6 +164,9 @@ public abstract class Unit : MonoBehaviour {
 
     }
 
+    void GetTargetTroop(List<Unit> units) {
+        Unit unit = GameManager.Instance.FriendlyTroops[Random.Range(0, GameManager.Instance.FriendlyTroops.Count)];
+    }
     public void TakeDamage(float damage) {
         hp -= damage;
         if (hp <= 0) {

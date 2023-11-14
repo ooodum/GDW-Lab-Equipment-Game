@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class GameManager : MonoBehaviour {
+    [SerializeField] TextMeshProUGUI friendlyText, enemyText;
     public static GameManager Instance { get; private set; }
     public PlayerInputActions inputActions;
 
@@ -82,5 +84,10 @@ public class GameManager : MonoBehaviour {
 
     void OnStartGame(InputAction.CallbackContext ctx) {
         StartGameEvent?.Invoke();
+    }
+
+    private void Update() {
+        friendlyText.text = FriendlyTroops.Count.ToString();
+        enemyText.text = EnemyTroops.Count.ToString();
     }
 }

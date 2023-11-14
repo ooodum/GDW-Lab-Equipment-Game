@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Damage: 1.25
   Health: 3
-  Range: 0.25
+  Range: 0
   Cost: 2
   AttackSpeed: 1
   MoveSpeed: 0.8
