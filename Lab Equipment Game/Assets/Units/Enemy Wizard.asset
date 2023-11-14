@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02476d8a8e30ea34983f8d95a46c9d4e, type: 3}
+  m_Name: Enemy Wizard
+  m_EditorClassIdentifier: 
+  Damage: 3
+  Health: 0.75
+  Range: 1
+  Cost: 6
+  AttackSpeed: 0.7
+  MoveSpeed: 1
+  Predelay: 0.3
+  Name: Enemy Wizard
+  Model: {fileID: 7499714973212302769, guid: 6fafb1577aacaba42beb892164fae216, type: 3}
+  Friendly: 0
+  Type: 2
+  Projectile: {fileID: 0}
+  particles: {fileID: 0}

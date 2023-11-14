@@ -10,6 +10,7 @@ public class RangedUnit : Unit {
     Transform[] projectiles;
 
     public override IEnumerator Attack() {
+        animator.SetTrigger("Bow");
         yield return new WaitForSeconds(unit.Predelay);
 
         projectiles[poolIndex].gameObject.SetActive(true);

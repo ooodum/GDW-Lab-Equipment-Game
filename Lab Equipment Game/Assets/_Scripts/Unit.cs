@@ -5,7 +5,7 @@ using DG.Tweening;
 
 public abstract class Unit : MonoBehaviour {
     public UnitInfo unit;
-    Animator animator;
+    protected Animator animator;
     Rigidbody rb;
     Collider col;
     protected State currentState;
@@ -13,6 +13,12 @@ public abstract class Unit : MonoBehaviour {
     protected Transform targetTransform;
     protected Unit targetUnit;
     Vector3 targetDirection;
+
+    public readonly int ATTACK = Animator.StringToHash("Attack");
+    public readonly int BOW = Animator.StringToHash("Bow");
+    public readonly int IDLE = Animator.StringToHash("Idle");
+    public readonly int SWORD = Animator.StringToHash("Sword");
+    public readonly int WALK = Animator.StringToHash("Walk");
 
     [HideInInspector]
     public int currentAttackers; // Denotes how many enemy units are attacking this
@@ -26,14 +32,15 @@ public abstract class Unit : MonoBehaviour {
     private void Awake() {
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
-        SwitchState(State.Idle);   
     }
     private void Start() {
         if (unit.Friendly) GameManager.Instance.FriendlyTroops.Add(this); else GameManager.Instance.EnemyTroops.Add(this);
 
         hp = unit.Health;
-        var model = Instantiate(unit.Model, transform.position + Vector3.up, Quaternion.identity, transform);
+        GameObject model = unit.Friendly ? Instantiate(unit.Model, transform.position + Vector3.up, Quaternion.identity, transform) : transform.GetChild(0).gameObject;
         animator = model.GetComponent<Animator>();
+
+        SwitchState(State.Idle);
 
         Setup();
     }
@@ -51,7 +58,16 @@ public abstract class Unit : MonoBehaviour {
     protected void SwitchState(State state) {
         currentState = state;
 
-        //animator.CrossFade(currentState.ToString(), .2f);
+        switch (state) {
+            case State.Idle:
+                animator.SetTrigger("Idle");
+                break;
+            case State.Run:
+                animator.SetTrigger("Walk");
+                break;
+            default: break;
+                //case State.Death: break;
+        }
     }
 
     void UpdateStates() {
@@ -69,10 +85,10 @@ public abstract class Unit : MonoBehaviour {
                 break;
 
             case State.Attack:
+                if (targetUnit == null) SwitchState(State.Run);
                 if (attackTimer <= 1f / unit.AttackSpeed) {
                     attackTimer += Time.deltaTime;
                 } else {
-                    print($"ATTACKING {targetUnit.unit.Friendly}");
                     attackTimer = 0;
                     animator.CrossFade(currentState.ToString(), .1f);
                     StartCoroutine(Attack());
@@ -113,7 +129,7 @@ public abstract class Unit : MonoBehaviour {
         }
 
         if (targetTransform != null) {
-            Vector3 v = targetTransform.position- transform.position;
+            Vector3 v = targetTransform.position - transform.position;
             distanceToTarget = v.magnitude;
             targetDirection = v.normalized;
         }

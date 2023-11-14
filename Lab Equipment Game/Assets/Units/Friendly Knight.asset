@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02476d8a8e30ea34983f8d95a46c9d4e, type: 3}
+  m_Name: Friendly Knight
+  m_EditorClassIdentifier: 
+  Damage: 1.25
+  Health: 3
+  Range: 0.25
+  Cost: 2
+  AttackSpeed: 1
+  MoveSpeed: 0.8
+  Predelay: 0.4
+  Name: Knight
+  Model: {fileID: 1605776415594703807, guid: c3234d5a2da47d8419792099df86bbe0, type: 3}
+  Friendly: 1
+  Type: 0
+  Projectile: {fileID: 0}
+  particles: {fileID: 0}
