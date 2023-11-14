@@ -4,7 +4,7 @@ using UnityEngine;
 using DG.Tweening;
 
 public abstract class Unit : MonoBehaviour {
-    [SerializeField] protected UnitInfo unit;
+    public UnitInfo unit;
     Animator animator;
     Rigidbody rb;
     Collider col;
@@ -26,15 +26,14 @@ public abstract class Unit : MonoBehaviour {
     private void Awake() {
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
-        SwitchState(State.Idle);
-
-        hp = unit.Health;
-
-        var model = Instantiate(unit.Model, transform.position, Quaternion.identity, transform);
-        animator = model.GetComponent<Animator>();
+        SwitchState(State.Idle);   
     }
     private void Start() {
         if (unit.Friendly) GameManager.Instance.FriendlyTroops.Add(this); else GameManager.Instance.EnemyTroops.Add(this);
+
+        hp = unit.Health;
+        var model = Instantiate(unit.Model, transform.position + Vector3.up, Quaternion.identity, transform);
+        animator = model.GetComponent<Animator>();
 
         Setup();
     }
@@ -44,7 +43,6 @@ public abstract class Unit : MonoBehaviour {
 
         UpdateTarget();
         UpdateStates();
-        PursueTarget();
         UpdateRotations();
         //print($"This: {transform.name}, Target: {targetTransform.name}");
 
@@ -57,16 +55,15 @@ public abstract class Unit : MonoBehaviour {
     }
 
     void UpdateStates() {
-        print(currentState);
         switch (currentState) {
             case State.Idle:
-                print("IDLE");
+                if (GameManager.Instance.CurrentGameState == GameManager.GameState.Play) SwitchState(State.Run);
                 break;
 
             case State.Run:
+                if (targetUnit == null) return;
                 rb.velocity = unit.MoveSpeed * targetDirection;
-
-                if (distanceToTarget <= unit.Range) {
+                if (distanceToTarget <= Mathf.Max(unit.Range, 2 * col.bounds.extents.z + .03f)) {
                     SwitchState(State.Attack);
                 }
                 break;
@@ -75,6 +72,7 @@ public abstract class Unit : MonoBehaviour {
                 if (attackTimer <= 1f / unit.AttackSpeed) {
                     attackTimer += Time.deltaTime;
                 } else {
+                    print($"ATTACKING {targetUnit.unit.Friendly}");
                     attackTimer = 0;
                     animator.CrossFade(currentState.ToString(), .1f);
                     StartCoroutine(Attack());
@@ -115,7 +113,7 @@ public abstract class Unit : MonoBehaviour {
         }
 
         if (targetTransform != null) {
-            Vector3 v = transform.position - targetTransform.position;
+            Vector3 v = targetTransform.position- transform.position;
             distanceToTarget = v.magnitude;
             targetDirection = v.normalized;
         }
@@ -149,17 +147,16 @@ public abstract class Unit : MonoBehaviour {
 
     }
 
-    void PursueTarget() {
-        rb.velocity = targetDirection * unit.MoveSpeed;
-    }
-
     public void TakeDamage(float damage) {
         hp -= damage;
         if (hp <= 0) {
             SwitchState(State.Death);
         }
     }
-
+    private void OnDestroy() {
+        if (unit.Friendly) GameManager.Instance.FriendlyTroops.Remove(this);
+        else GameManager.Instance.EnemyTroops.Remove(this);
+    }
     public abstract IEnumerator Attack();
     public abstract void Setup();
 }

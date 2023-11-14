@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class MeleeUnit : Unit {
-    [Header("Attack")]
-    [SerializeField] float predelay; // Time in seconds before the swing actually occurs in the animation
-
     public override IEnumerator Attack() {
-        yield return new WaitForSeconds(predelay);
+        yield return new WaitForSeconds(unit.Predelay);
         targetUnit.TakeDamage(unit.Damage);
     }
 

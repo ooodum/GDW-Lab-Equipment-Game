@@ -11,10 +11,14 @@ public class GameManager : MonoBehaviour {
 
     // Events
     public event Action<Vector3> MoveEvent;
-    public event Action MoveCancelledEvent;
+
+    public event Action LockMouseEvent;
+    public event Action LockMouseCancelledEvent;
 
     public event Action<Vector2> LookEvent;
-    public event Action LookCancelledEvent;
+
+    public event Action ClickEvent;
+    public event Action StartGameEvent;
 
     private void Awake() {
         if (Instance != null && Instance != this) Destroy(this); else Instance = this;
@@ -28,10 +32,17 @@ public class GameManager : MonoBehaviour {
         Play
     }
     private void OnEnable() {
-        inputActions.Play.Move.performed += OnMove;
-        inputActions.Preparation.Move.performed += OnMove;
-        inputActions.Play.Look.performed += OnLook;
-        inputActions.Preparation.Look.performed += OnLook;
+        // Movement Input Events
+        inputActions.Movement.Move.performed += OnMove;
+        inputActions.Movement.Look.performed += OnLook;
+        inputActions.Movement.LockMouse.performed += OnLockMouse;
+        inputActions.Movement.LockMouse.canceled += OnLockMouse;
+
+        // Prep Input Events
+        inputActions.Prep.Click.performed += OnClick;
+        inputActions.Prep.StartGame.performed += OnStartGame;
+
+        // Play Input Events
     }
     public GameState CurrentGameState { get; private set; }
 
@@ -39,24 +50,37 @@ public class GameManager : MonoBehaviour {
         switch (state) {
             case GameState.Preparation:
                 CurrentGameState = GameState.Preparation;
+                inputActions.Movement.Enable();
+                inputActions.Prep.Enable();
                 inputActions.Play.Disable();
-                inputActions.Preparation.Enable();
                 break;
             case GameState.Play:
                 CurrentGameState = GameState.Play;
-                inputActions.Preparation.Disable();
+                inputActions.Prep.Disable();
+                inputActions.Movement.Enable();
                 inputActions.Play.Enable();
                 break;
         }
     }
 
-    public void OnMove(InputAction.CallbackContext ctx) {
-        if (ctx.phase == InputActionPhase.Performed) MoveEvent?.Invoke(ctx.ReadValue<Vector3>());
-        if (ctx.phase == InputActionPhase.Canceled) MoveCancelledEvent?.Invoke();
+    void OnMove(InputAction.CallbackContext ctx) {
+        MoveEvent?.Invoke(ctx.ReadValue<Vector3>());
     }
 
-    public void OnLook(InputAction.CallbackContext ctx) {
-        print(ctx.phase);
+    void OnLook(InputAction.CallbackContext ctx) {
         LookEvent?.Invoke(ctx.ReadValue<Vector2>());
+    }
+
+    void OnLockMouse(InputAction.CallbackContext ctx) {
+        if (ctx.phase == InputActionPhase.Performed) LockMouseEvent?.Invoke();
+        if (ctx.phase == InputActionPhase.Canceled) LockMouseCancelledEvent?.Invoke();
+    }
+
+    void OnClick(InputAction.CallbackContext ctx) {
+        ClickEvent?.Invoke();
+    }
+
+    void OnStartGame(InputAction.CallbackContext ctx) {
+        StartGameEvent?.Invoke();
     }
 }
