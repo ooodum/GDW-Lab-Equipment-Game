@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: Friendly Archer
   m_EditorClassIdentifier: 
   Damage: 2
-  Health: 1
-  Range: 2
+  Health: 2
+  Range: 5
   Cost: 4
-  AttackSpeed: 1.25
+  AttackSpeed: 0.7
   MoveSpeed: 0.9
   Predelay: 0.4
   Name: Archer
-  Model: {fileID: 8654437737612501213, guid: ae480eb70bb8ed24bbe3f8707761ece6, type: 3}
+  Model: {fileID: 8654437737612501213, guid: 21aa3c6af47ff2343ae60f90e71fd9aa, type: 3}
   Friendly: 1
   Type: 1
-  Projectile: {fileID: 0}
+  Projectile: {fileID: 7350087504832482534, guid: 047d179f9d478e94ebc895c257f65d89, type: 3}
   particles: {fileID: 0}

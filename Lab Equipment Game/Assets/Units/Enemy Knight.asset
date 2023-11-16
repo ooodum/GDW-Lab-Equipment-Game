@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02476d8a8e30ea34983f8d95a46c9d4e, type: 3}
   m_Name: Enemy Knight
   m_EditorClassIdentifier: 
-  Damage: 1.25
-  Health: 3
-  Range: 0
+  Damage: 1.5
+  Health: 10
+  Range: 2
   Cost: 2
   AttackSpeed: 1
   MoveSpeed: 0.8

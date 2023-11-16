@@ -42,14 +42,17 @@ public abstract class Unit : MonoBehaviour {
         SwitchState(State.Idle);
 
         Setup();
+
+        attackTimer = 1f / unit.AttackSpeed;
+
     }
 
     void Update() {
         SetTarget();
-
         UpdateTarget();
         UpdateStates();
         UpdateRotations();
+        TestUpdate();
         //print($"This: {transform.name}, Target: {targetTransform.name}");
 
     }
@@ -70,26 +73,26 @@ public abstract class Unit : MonoBehaviour {
     }
 
     void UpdateStates() {
-        transform.GetChild(0).GetChild(1).position = Vector3.zero;
+        if (attackTimer <= 1f / unit.AttackSpeed) {
+            attackTimer += Time.deltaTime;
+        }
 
-        switch (currentState) {
+            switch (currentState) {
             case State.Idle:
                 if (GameManager.Instance.CurrentGameState == GameManager.GameState.Play) SwitchState(State.Run);
                 break;
 
             case State.Run:
-                if (targetUnit == null) return;
                 rb.velocity = unit.MoveSpeed * targetDirection;
-                if (distanceToTarget <= Mathf.Max(unit.Range, 2 * col.bounds.extents.z + .03f)) {
-                    SwitchState(State.Attack);
-                }
+                if (InRangeToAttack()) SwitchState(State.Attack);
                 break;
 
             case State.Attack:
-                if (targetUnit == null) SwitchState(State.Run);
-                if (attackTimer <= 1f / unit.AttackSpeed) {
-                    attackTimer += Time.deltaTime;
-                } else {
+                if (targetUnit == null) {
+                    ClearUnit();
+                    SwitchState(State.Run);
+                }
+                if (attackTimer >= 1f / unit.AttackSpeed) {
                     attackTimer = 0;
                     animator.CrossFade(currentState.ToString(), .1f);
                     StartCoroutine(Attack());
@@ -97,6 +100,8 @@ public abstract class Unit : MonoBehaviour {
                 break;
 
             case State.Death:
+                if (targetUnit) targetUnit.currentAttackers--;
+                FMODUnity.RuntimeManager.PlayOneShot("event:/Death", transform.position);
                 Destroy(gameObject);
                 break;
 
@@ -111,7 +116,7 @@ public abstract class Unit : MonoBehaviour {
         Vector3 lookAt = Vector3.zero;
 
         if (rb.velocity.magnitude > 0) {
-            lookAt = rb.velocity;
+            lookAt = targetDirection;
             lookAt.y = 0;
             lookAt = lookAt.normalized;
         }
@@ -137,21 +142,14 @@ public abstract class Unit : MonoBehaviour {
     }
 
     void SetTarget() {
-        if (targetTransform != null) return;
+        //if (targetTransform != null) return;
         if (unit.Friendly) {
-            targetTransform = null;
-            foreach (Unit unit in GameManager.Instance.EnemyTroops) {
-                Transform t = unit.transform;
-                if (targetTransform != null) if (!((transform.position - t.position).magnitude < (transform.position - targetTransform.position).magnitude)) return;
-                if (!(unit.currentAttackers < 3)) return;
+            GetTargetTroop(GameManager.Instance.EnemyTroops);
 
-                targetTransform = t;
-                targetUnit = unit;
-                unit.currentAttackers++;
-            }
         } else {
-            targetTransform = null;
-            foreach (Unit unit in GameManager.Instance.FriendlyTroops) {
+            GetTargetTroop(GameManager.Instance.FriendlyTroops);
+
+            /*foreach (Unit unit in GameManager.Instance.FriendlyTroops) {
                 Transform t = unit.transform;
                 if (targetTransform != null) if (!((transform.position - t.position).magnitude < (transform.position - targetTransform.position).magnitude)) return;
                 if (!(unit.currentAttackers < 3)) return;
@@ -159,15 +157,28 @@ public abstract class Unit : MonoBehaviour {
                 targetTransform = t;
                 targetUnit = unit;
                 unit.currentAttackers++;
-            }
+            }*/
         }
 
     }
 
     void GetTargetTroop(List<Unit> units) {
-        Unit unit = GameManager.Instance.FriendlyTroops[Random.Range(0, GameManager.Instance.FriendlyTroops.Count)];
+        if (units == null || units.Count == 0 || InRangeToAttack()) return;
+        foreach (Unit unit in units) {
+            Transform t = unit.transform;
+            if (targetTransform == null) {
+                targetTransform = t;
+                targetUnit = unit;
+            }
+            if (((transform.position - t.position).magnitude < (transform.position - targetTransform.position).magnitude)) {
+                targetTransform = t;
+                targetUnit = unit;
+                print("new target found");
+            }
+        }
     }
     public void TakeDamage(float damage) {
+        FMODUnity.RuntimeManager.PlayOneShot("event:/Hurt", transform.position);
         hp -= damage;
         if (hp <= 0) {
             SwitchState(State.Death);
@@ -179,4 +190,17 @@ public abstract class Unit : MonoBehaviour {
     }
     public abstract IEnumerator Attack();
     public abstract void Setup();
+
+    bool InRangeToAttack() {
+        if (distanceToTarget == 0) return false;
+        return distanceToTarget <= Mathf.Max(unit.Range, 2 * col.bounds.extents.z + .03f);
+    }
+
+    protected void ClearUnit() {
+        distanceToTarget = 0;
+        targetTransform = null;
+        targetUnit = null;
+    }
+
+    protected virtual void TestUpdate() { } //Used to test stuff inside inherited troops, don't use this to do game logic
 }

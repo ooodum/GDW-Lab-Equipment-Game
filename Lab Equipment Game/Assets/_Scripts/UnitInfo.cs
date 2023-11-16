@@ -8,7 +8,7 @@ public class UnitInfo : ScriptableObject {
     public float Damage;
     public float Health;
     public float Range;
-    public float Cost;
+    public int Cost;
     public float AttackSpeed;
     public float MoveSpeed;
     public float Predelay;
@@ -20,7 +20,7 @@ public class UnitInfo : ScriptableObject {
     public UnitType Type;
 
     [Header("Attack")]
-    public Transform Projectile;
+    public GameObject Projectile;
     public ParticleSystem particles;
 
     public enum UnitType {

@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02476d8a8e30ea34983f8d95a46c9d4e, type: 3}
   m_Name: Friendly Wizard
   m_EditorClassIdentifier: 
-  Damage: 3
-  Health: 0.75
-  Range: 1
+  Damage: 2
+  Health: 2
+  Range: 10
   Cost: 6
-  AttackSpeed: 0.7
-  MoveSpeed: 1
-  Predelay: 0.3
+  AttackSpeed: 0.4
+  MoveSpeed: 0.9
+  Predelay: 0.1
   Name: Enemy Wizard
-  Model: {fileID: 7499714973212302769, guid: 6fafb1577aacaba42beb892164fae216, type: 3}
+  Model: {fileID: 6963514283954574677, guid: 83b62af15f6756244b0953a1eefff7eb, type: 3}
   Friendly: 1
   Type: 2
-  Projectile: {fileID: 0}
+  Projectile: {fileID: 7797495438103181237, guid: 18a85cafe347218498663b8d1bd06043, type: 3}
   particles: {fileID: 0}
